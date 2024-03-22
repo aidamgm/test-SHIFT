@@ -6,20 +6,31 @@ var noteList = [Note]()
 var context: NSManagedObjectContext!
 
 
-class NoteTableView: UITableViewController
-{
+class NoteTableView: UITableViewController {
 	var firstLoad = true
     let appDelegate = UIApplication.shared.delegate as! AppDelegate
+    
+    func createDefaultNote() {
+              let defaultNoteText = "позаниматься спортом 15 минут"
+              let newNote = Note(context: context)
+              newNote.title = "Ваша первая заметка"
+              newNote.desc = defaultNoteText
+              
+              do {
+                  try context.save()
+                  noteList.append(newNote)
+              } catch {
+                  print("Failed to save new note: \(error)")
+              }
+          }
 
     
 	
-	func nonDeletedNotes() -> [Note]
-	{
+	func nonDeletedNotes() -> [Note] {
 		var noDeleteNoteList = [Note]()
-		for note in noteList
-		{
-			if(note.deletedDate == nil)
-			{
+        
+		for note in noteList {
+			if(note.deletedDate == nil) {
 				noDeleteNoteList.append(note)
 			}
 		}
@@ -34,6 +45,9 @@ class NoteTableView: UITableViewController
             let request = NSFetchRequest<Note>(entityName: "Note")
             do {
                 noteList = try context.fetch(request)
+                if noteList.isEmpty {
+                    createDefaultNote()
+                }
             } catch {
                 print("Fetch Failed")
             }
